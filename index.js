@@ -23,6 +23,9 @@ class AppInitialize{
     
     async initializeProject(){
         const AuthController = require('./controllers/auth_controller');
+        const CategoryController = require('./controllers/category_controller')
+        const ExpenseController = require('./controllers/expense_controller')
+
         const PORT = process.env.PORT || 4200;
         this.app.use(cors({
             origin: '*'
@@ -35,6 +38,8 @@ class AppInitialize{
         })
 
         this.app.use('/auth', AuthController);
+        this.app.use('/category',CategoryController);
+        this.app.use('/expenses',ExpenseController);
 
 
         // Handling Undefined route

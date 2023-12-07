@@ -38,5 +38,21 @@ router.post('/login', async(req,res,next)=>{
     catch(err){
         next(err);
     }
+});
+
+router.post("/generateNewAccessToken", async(req,res,next)=>{
+    try{
+        const authObj = new AuthService();
+
+        const data = await authObj.generateNewAccessToken(req.body);
+        res.send({
+            "message":"Token generation success",
+            "status":200,
+            "data":data
+        })
+    }
+    catch(err){
+        next(err);
+    }
 })
 module.exports = router;

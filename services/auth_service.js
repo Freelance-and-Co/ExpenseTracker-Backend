@@ -167,6 +167,38 @@ class AuthService{
         })
     }
 
+    async verifyRefreshToken(refreshToken) {
+        return new Promise((resolve, reject) => {
+            jsonwebtoken.verify(
+                refreshToken,
+                process.env.REFRESH_TOKEN_SECRETKEY,
+                (err, payload) => {
+                    if (err) return reject(createError.Unauthorized("Token Invalid/Expired"))
+                    const userId = payload.aud
+                    return resolve(userId)
+                }
+            )
+        })
+    }
+
+    async generateNewAccessToken(payload) {
+        try {
+            const {refreshToken} = payload;
+            if(!refreshToken) {
+                throw createError.BadRequest("Refresh token cannot be empty");
+            }
+            const userId = await this.verifyRefreshToken(refreshToken);
+            const accessToken = await this.generateAccessToken(userId);
+            const data = {
+                "accessToken": accessToken
+            }
+            return data
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
 }
 
 module.exports = AuthService;
