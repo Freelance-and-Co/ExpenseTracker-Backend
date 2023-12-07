@@ -22,7 +22,18 @@ router.post("/register", async(req,res,next)=>{
 
 router.post('/login', async(req,res,next)=>{
     try{
+        const authObj = new AuthService();
 
+        const data = await authObj.login(req.body)
+            .catch(err => {
+                throw err;
+            });
+
+        res.send({
+            "status": 200,
+            "message": "Logged in successfully",
+            "data": data
+        })
     }
     catch(err){
         next(err);

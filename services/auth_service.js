@@ -1,6 +1,7 @@
 const createError = require('http-errors')
 const UserModel = require('../models/UserModel')
 const bcrypt = require('bcrypt')
+const jsonwebtoken = require('jsonwebtoken');
 
 class AuthService{
     constructor(){
@@ -59,13 +60,111 @@ class AuthService{
             return newUser;
         }
         catch(err){
-            console.log(err);
             throw err;
         }
     }
 
-    async loginUser(){
+    async login(payload){
+        try{
 
+            const {email, password} = payload;
+            if(!email){
+                throw createError.BadRequest("Email Id cannot be null");
+            }
+            if(!password){
+                throw createError.BadGateway("Password cannot be null");
+            }
+
+            const user = await UserModel.findOne({
+                "where": {
+                    email: email
+                }
+            }).catch(err => {
+                console.log("Error during login",err);
+                throw createError.InternalServerError("Error during Login")
+            })
+
+            if (!user) {
+                throw createError.NotFound("User Not Registered");
+            }
+
+            const userPassword = user.dataValues.password;
+
+            const isValid = await bcrypt.compare(password, userPassword);
+
+            if (!isValid) {
+                throw createError.Unauthorized("Email/Password not valid")
+            }
+
+            const tokenPayload = user.dataValues.id.toString();
+
+            const accessToken = await this.generateAccessToken(tokenPayload);
+
+            const refreshToken = await this.generateRefreshToken(tokenPayload);
+
+            const data = {
+                accessToken, refreshToken, "id": user.dataValues.id,"email":user.dataValues.email
+            }
+
+            return data
+
+        }
+        catch(err){
+            throw err;
+        }
+    }
+
+    async generateAccessToken(tokenPayload){
+        return new Promise((resolve, reject) => {
+            const payload = {}
+            const secret = process.env.ACCESS_TOKEN_SECRETKEY
+            const options = {
+                expiresIn: '10m',
+                issuer: 'expensemanager',
+                audience: tokenPayload,
+            }
+            jsonwebtoken.sign(payload, secret, options, (err, token) => {
+                if (err) {
+                    console.log(err.message)
+                    reject(new createError.InternalServerError("Error during JWT Token Creation"))
+                    return
+                }
+                resolve(token)
+            })
+        })
+    }
+
+    async generateRefreshToken(tokenPayload){
+        return new Promise((resolve, reject) => {
+            const payload = {}
+            const secret = process.env.REFRESH_TOKEN_SECRETKEY
+            const options = {
+                expiresIn: '1y',
+                issuer: 'expensemanager',
+                audience: tokenPayload,
+            }
+            jsonwebtoken.sign(payload, secret, options, (err, token) => {
+                if (err) {
+                    console.log(err.message)
+                    reject(new createError.InternalServerError("Error during JWT token creation"))
+                    return
+                }
+                resolve(token)
+            })
+        })
+    }
+
+    async verifyAccessToken(req, res, next) {
+        if (!req.headers['authorization']) return next(new createError.Unauthorized("Please provide token"))
+        const authHeader = req.headers['authorization']
+        const bearerToken = authHeader.split(' ')
+        const token = bearerToken[1]
+        jsonwebtoken.verify(token, process.env.ACCESS_TOKEN_SECRETKEY, (err, payload) => {
+            if (err) {
+                return next(new createError.Unauthorized("Token Invalid/Expired"))
+            }
+            next();
+        })
     }
 
 }
