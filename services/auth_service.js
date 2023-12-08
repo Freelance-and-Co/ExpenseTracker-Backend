@@ -103,7 +103,7 @@ class AuthService{
             const refreshToken = await this.generateRefreshToken(tokenPayload);
 
             const data = {
-                accessToken, refreshToken, "id": user.dataValues.id,"email":user.dataValues.email
+                accessToken, refreshToken, "id": user.dataValues.id,"email":user.dataValues.email, "name":user.dataValues.name
             }
 
             return data
