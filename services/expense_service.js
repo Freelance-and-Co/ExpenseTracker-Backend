@@ -38,19 +38,19 @@ class ExpenseService{
             const {description,category_id,amount,user_id, date} = payload;
 
             if(!category_id){
-                return createError.BadRequest("Category Id cannot be empty");
+                throw createError.BadRequest("Category Id cannot be empty");
             }
 
             if(!amount){
-                return createError.BadRequest("Amount cannot be empty");
+                throw createError.BadRequest("Amount cannot be empty");
             }
 
             if(!user_id){
-                return createError.BadRequest("User Id cannot be empty");
+                throw createError.BadRequest("User Id cannot be empty");
             }
 
             if(!date){
-                return createError.BadRequest("Date cannot be empty");
+                throw createError.BadRequest("Date cannot be empty");
             }
 
             const data = await ExpensesModel.create({

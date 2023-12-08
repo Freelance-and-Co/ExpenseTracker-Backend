@@ -29,11 +29,11 @@ class CategoryService{
         try{
             const {name, user_id} = payload;
             if(!name){
-                return createError.BadRequest("Category Name cannot be empty");
+                throw createError.BadRequest("Category Name cannot be empty");
             }
 
             if(!user_id){
-                return createError.BadRequest("User Id cannot be empty");
+                throw createError.BadRequest("User Id cannot be empty");
             }
 
             const nameIdentifier = name.toLowerCase().split(' ').join('_');
@@ -49,7 +49,7 @@ class CategoryService{
 
 
             if(data){
-                return createError.Conflict("Category Name already exists");
+                throw createError.Conflict("Category Name already exists");
             }
 
             const createData = await CategoryModel.create({
