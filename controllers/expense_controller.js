@@ -8,7 +8,10 @@ const AuthService = require('../services/auth_service');
 router.post("/getExpenses", new AuthService().verifyAccessToken, async (req,res,next)=>{
     try{
         const expenseServiceObj = new ExpenseService();
-        const data = await expenseServiceObj.getExpenseByCategory(req.body);
+        const data = await expenseServiceObj.getExpenseByCategory({
+            ...req.body,
+            "user_id":parseInt(req.payload)
+        });
 
         res.send({
             "status":"200",
@@ -20,10 +23,14 @@ router.post("/getExpenses", new AuthService().verifyAccessToken, async (req,res,
         next(err);
     }
 })
+
 router.post("/addExpense", new AuthService().verifyAccessToken, async (req,res,next)=>{
     try{
         const expenseServiceObj = new ExpenseService();
-        const data = await expenseServiceObj.addExpense(req.body);
+        const data = await expenseServiceObj.addExpense({
+            ...req.body,
+            "user_id":parseInt(req.payload)
+        });
 
         res.send({
             "message":"Expense added successfully",
@@ -42,10 +49,49 @@ router.post("/deleteExpense", new AuthService().verifyAccessToken, async(req,res
     try{
         const expenseServiceObj = new ExpenseService();
 
-        await expenseServiceObj.deleteExpense(req.body);
+        await expenseServiceObj.deleteExpense({
+            ...req.body,
+            "user_id":parseInt(req.payload)
+        });
+        
         res.send({
             "message":"Expense deleted successfully",
             "status":200
+        })
+    }
+    catch(err){
+        next(err);
+    }
+})
+
+router.get('/getAllExpenses', new AuthService().verifyAccessToken, async(req,res,next)=>{
+    try{
+        const expenseServiceObj = new ExpenseService();
+        const data =  await expenseServiceObj.getAllExpenses(parseInt(req.payload));
+
+        res.send({
+            "message":"Data Fetched SuccessFully",
+            "status":200,
+            "data":data
+        })
+    }   
+    catch(err){
+        next(err);
+    }
+})
+
+router.post("/getExpenseByMonthAndYear", new AuthService().verifyAccessToken, async(req,res,next)=>{
+    try{
+        const expenseServiceObj = new ExpenseService();
+        const data = await expenseServiceObj.getExpenseByMonthAndYear({
+            ...req.body,
+            "user_id":parseInt(req.payload)
+        });
+
+        res.send({
+            "message":"Data Fetched Successfully",
+            "status":200,
+            "data":data
         })
     }
     catch(err){

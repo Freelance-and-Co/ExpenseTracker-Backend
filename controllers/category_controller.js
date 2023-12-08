@@ -5,11 +5,11 @@ const CategoryService = require('../services/category_service');
 const AuthService = require('../services/auth_service');
 
 
-router.get("/getAllCategories/:user_id", new AuthService().verifyAccessToken, async (req,res,next)=>{
+router.get("/getAllCategories", new AuthService().verifyAccessToken, async (req,res,next)=>{
     try{
         const categoryServiceObj = new CategoryService();
 
-        const data = await categoryServiceObj.getAllCategories(req.params.user_id);
+        const data = await categoryServiceObj.getAllCategories(parseInt(req.payload));
         res.send({
             "message":"Data fetched successfully",
             "status":200,
@@ -23,7 +23,10 @@ router.get("/getAllCategories/:user_id", new AuthService().verifyAccessToken, as
 router.post("/addCategory", new AuthService().verifyAccessToken, async (req,res,next)=>{
     try{
         const categoryServiceObj = new CategoryService();
-        const data = await categoryServiceObj.addCategory(req.body);
+        const data = await categoryServiceObj.addCategory({
+            ...req.body,
+            "user_id":parseInt(req.payload)
+        });
 
         res.send({
             "message":"Category added successfully",
@@ -40,7 +43,10 @@ router.post("/deleteCategory", new AuthService().verifyAccessToken, async (req,r
     try{
         const categoryServiceObj = new CategoryService();
 
-        await categoryServiceObj.deleteCategory(req.body);
+        await categoryServiceObj.deleteCategory({
+            ...req.body,
+            "user_id":parseInt(req.payload)
+        });
         res.send({
             "message":"Category deleted successfully",
             "status":200

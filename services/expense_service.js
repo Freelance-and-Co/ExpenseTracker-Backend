@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const ExpensesModel = require('../models/ExpensesModel')
+const Sequelize = require('sequelize');
 
 class ExpenseService{
     constructor(){
@@ -82,6 +83,46 @@ class ExpenseService{
                 console.log("Error during expense deletion",err);
                 throw createError.InternalServerError("Error during expense deletion");
             })
+        }
+        catch(err){
+            throw err;
+        }
+    }
+
+    async getAllExpenses(user_id){
+        try{
+            const data = await ExpensesModel.findAll({
+                where:{
+                    user_id:user_id
+                }
+            }).catch(err=>{
+                console.log("Error during get all expenses",err);
+                throw createError.InternalServerError("Error during expense fetching");
+            });
+
+            return data;
+        }
+        catch(err){
+            throw err;
+        }
+    }
+
+    async getExpenseByMonthAndYear(payload){
+        try{
+            const {month, year, user_id} = payload;
+            if(!month || !year){
+                throw createError.InternalServerError("year/month cannot be empty");
+            }
+            const query = `select * from expense where user_id = ${user_id} and MONTH(createdAt) = ${month} and YEAR(createdAt) = ${year};`;
+
+            const data = await DATA.CONNECTION.mysql.query(query,{
+                type: Sequelize.QueryTypes.SELECT
+            }).catch(err=>{
+                console.log("Error while fetching data from Expenses table",err);
+                throw createError.InternalServerError("Error during Expense fetching");
+            });
+
+            return data;
         }
         catch(err){
             throw err;

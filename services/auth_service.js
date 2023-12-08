@@ -163,6 +163,8 @@ class AuthService{
             if (err) {
                 return next(new createError.Unauthorized("Token Invalid/Expired"))
             }
+            const userId = payload.aud
+            req.payload = userId;
             next();
         })
     }
