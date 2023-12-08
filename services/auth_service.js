@@ -72,7 +72,7 @@ class AuthService{
                 throw createError.BadRequest("Email Id cannot be null");
             }
             if(!password){
-                throw createError.BadGateway("Password cannot be null");
+                throw createError.BadRequest("Password cannot be null");
             }
 
             const user = await UserModel.findOne({
