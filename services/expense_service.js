@@ -35,7 +35,7 @@ class ExpenseService{
     }
     async addExpense(payload){
         try{
-            const {description,category_id,amount,user_id} = payload;
+            const {description,category_id,amount,user_id, date} = payload;
 
             if(!category_id){
                 return createError.BadRequest("Category Id cannot be empty");
@@ -49,11 +49,16 @@ class ExpenseService{
                 return createError.BadRequest("User Id cannot be empty");
             }
 
+            if(!date){
+                return createError.BadRequest("Date cannot be empty");
+            }
+
             const data = await ExpensesModel.create({
                 description:description,
                 category_id:category_id,
                 amount:amount,
-                user_id:user_id
+                user_id:user_id,
+                date:date
             }).catch(err=>{
                 console.log("Error during expense creation",err);
                 throw createError.InternalServerError("Error during Expense Creation");
@@ -113,7 +118,9 @@ class ExpenseService{
             if(!month || !year){
                 throw createError.InternalServerError("year/month cannot be empty");
             }
-            const query = `select * from expense where user_id = ${user_id} and MONTH(createdAt) = ${month} and YEAR(createdAt) = ${year};`;
+            const query = `select * from expense where user_id = ${user_id} and SUBSTRING_INDEX(date, '-', 1) = '${month}'
+            AND SUBSTRING_INDEX(date, '-', -1) = '${year}'`;
+            console.log(query);
 
             const data = await DATA.CONNECTION.mysql.query(query,{
                 type: Sequelize.QueryTypes.SELECT
@@ -123,6 +130,15 @@ class ExpenseService{
             });
 
             return data;
+        }
+        catch(err){
+            throw err;
+        }
+    }
+
+    async addBudget(payload){
+        try{
+
         }
         catch(err){
             throw err;

@@ -39,7 +39,8 @@ class CategoryService{
             const nameIdentifier = name.toLowerCase().split(' ').join('_');
             const data = await CategoryModel.findOne({
                 where:{
-                    name_identifier:nameIdentifier
+                    name_identifier:nameIdentifier,
+                    user_id:user_id
                 }
             }).catch(err => {
                 console.log("Error during checking category", err.message)

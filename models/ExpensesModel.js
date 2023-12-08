@@ -22,6 +22,10 @@ const ExpensesModel = global.DATA.CONNECTION.mysql.define("expense", {
     user_id:{
         type:Sequelize.DataTypes.INTEGER,
         allowNull:false
+    },
+    date:{
+        type:Sequelize.STRING(100),
+        allowNull:false
     }
 }, {
     tableName: "expense"
