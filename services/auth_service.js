@@ -165,6 +165,7 @@ class AuthService{
             }
             const userId = payload.aud
             req.payload = userId;
+            req.expireTime = payload.exp;
             next();
         })
     }
@@ -201,6 +202,21 @@ class AuthService{
         }
     }
 
+    async getRemainingTokenTime(expiresAt){
+        try{
+            const currentTime = Math.floor(Date.now() / 1000);
+
+            const timeDifference = expiresAt - currentTime;
+
+            const minutes = Math.floor(timeDifference / 60);
+            const seconds = timeDifference % 60;
+
+            return `${minutes}:${seconds}`
+        }
+        catch(err){
+            throw err;
+        }
+    }
 }
 
 module.exports = AuthService;

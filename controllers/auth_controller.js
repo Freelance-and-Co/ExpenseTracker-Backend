@@ -55,4 +55,20 @@ router.post("/generateNewAccessToken", async(req,res,next)=>{
         next(err);
     }
 })
+
+router.get('/getRemainingTime', new AuthService().verifyAccessToken, async (req,res,next)=>{
+    try{
+        const authObj = new AuthService();
+        const data = await authObj.getRemainingTokenTime(req.expireTime);
+
+        res.send({
+            "message":"Data Fetched Successfully",
+            "data":data,
+            "status":200
+        })
+    }   
+    catch(err){
+        next(err);
+    }
+})
 module.exports = router;
