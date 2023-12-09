@@ -120,7 +120,7 @@ class ExpenseService{
             if(!month || !year){
                 throw createError.InternalServerError("year/month cannot be empty");
             }
-            const query = `select * from expense where user_id = 7 and SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 2),'-',-1) = '${month}'
+            const query = `select * from expense where user_id = ${user_id} and SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 2),'-',-1) = '${month}'
             AND SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3),'-',-1) = '${year}';`;
             console.log(query);
 
