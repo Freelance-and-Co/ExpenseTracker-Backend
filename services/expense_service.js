@@ -98,10 +98,11 @@ class ExpenseService{
 
     async getAllExpenses(user_id){
         try{
-            const data = await ExpensesModel.findAll({
-                where:{
-                    user_id:user_id
-                }
+            const query = `select e.*, c.name as category_name from expense e JOIN categories c ON e.category_id = c.id 
+            and e.user_id = c.user_id where e.user_id = ${user_id};`
+            
+            const data = await DATA.CONNECTION.mysql.query(query,{
+                type: Sequelize.QueryTypes.SELECT
             }).catch(err=>{
                 console.log("Error during get all expenses",err);
                 throw createError.InternalServerError("Error during expense fetching");
@@ -120,8 +121,9 @@ class ExpenseService{
             if(!month || !year){
                 throw createError.InternalServerError("year/month cannot be empty");
             }
-            const query = `select * from expense where user_id = ${user_id} and SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 2),'-',-1) = '${month}'
-            AND SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3),'-',-1) = '${year}';`;
+            const query = `select e.* , c.name as category_name from expense e JOIN categories c ON 
+            e.category_id = c.id and e.user_id = c.user_id where e.user_id = ${user_id} and SUBSTRING_INDEX(SUBSTRING_INDEX(e.date, '-', 2),'-',-1) = '${month}'
+                        AND SUBSTRING_INDEX(SUBSTRING_INDEX(e.date, '-', 3),'-',-1) = '${year}';`;
             console.log(query);
 
             const data = await DATA.CONNECTION.mysql.query(query,{
