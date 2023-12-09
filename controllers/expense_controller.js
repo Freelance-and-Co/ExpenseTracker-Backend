@@ -101,7 +101,58 @@ router.post("/getExpenseByMonthAndYear", new AuthService().verifyAccessToken, as
 
 router.post('/addBudget', new AuthService().verifyAccessToken, async(req,res,next)=>{
     try{
-        
+        const expenseServiceObj = new ExpenseService();
+
+        const data = await expenseServiceObj.addBudget({
+            ...req.body,
+            "user_id":parseInt(req.payload)
+        });
+
+        res.send({
+            "message":"Budget added successfully",
+            "status":200,
+            "data":data
+        })
+    }
+    catch(err){
+        next(err);
+    }
+})
+
+router.post('/editBudget', new AuthService().verifyAccessToken, async (req,res,next)=>{
+    try{
+        const expenseServiceObj = new ExpenseService();
+
+        const data = await expenseServiceObj.editBudget({
+            ...req.body,
+            "user_id":parseInt(req.payload)
+        });
+
+        res.send({
+            "message":"Budget Updated successfully",
+            "status":200,
+            "data":data
+        }) 
+    }
+    catch(err){
+        next(err);
+    }
+});
+
+router.post("/getBudgetDetails", new AuthService().verifyAccessToken, async (req,res,next)=>{
+    try{
+        const expenseServiceObj = new ExpenseService();
+
+        const data = await expenseServiceObj.getBudgetDetails({
+            ...req.body,
+            "user_id":parseInt(req.payload)
+        })
+
+        res.send({
+            "message":"Data fetched successfully",
+            "status":200,
+            "data":data
+        })
     }
     catch(err){
         next(err);

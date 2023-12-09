@@ -17,6 +17,10 @@ const BudgetModel = global.DATA.CONNECTION.mysql.define("categories",{
     amount:{
         type:Sequelize.FLOAT,
         allowNull:false
+    },
+    user_id:{
+        type:Sequelize.INTEGER,
+        allowNull:false
     }
 },{
     tableName:"budget"

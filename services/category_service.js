@@ -1,6 +1,7 @@
 const createError = require('http-errors');
 const CategoryModel = require('../models/CategoryModel')
-const ExpensesModel = require('../models/ExpensesModel')
+const ExpensesModel = require('../models/ExpensesModel');
+const { Sequelize } = require('sequelize');
 
 class CategoryService{
     constructor(){
@@ -8,11 +9,11 @@ class CategoryService{
     }
 
     async getAllCategories(user_id){
-        try{
-            const data = await CategoryModel.findAll({
-                where:{
-                    user_id:user_id
-                }
+        try{    
+            const query = `select c.*, COALESCE(SUM(e.amount), 0) AS total_expenses from categories c LEFT JOIN expense e on c.id = e.category_id
+            and c.user_id = e.user_id where c.user_id = ${user_id} group by c.id;`
+            const data = await DATA.CONNECTION.mysql.query(query,{
+                type: Sequelize.QueryTypes.SELECT
             }).catch(err=>{
                 console.log("Error while fetching category data",err);
                 throw createError.InternalServerError("Error while fetching category data");

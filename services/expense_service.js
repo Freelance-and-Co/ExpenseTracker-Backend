@@ -1,6 +1,7 @@
 const createError = require('http-errors');
 const ExpensesModel = require('../models/ExpensesModel')
 const Sequelize = require('sequelize');
+const BudgetModel = require('../models/BudgetModel')
 
 class ExpenseService{
     constructor(){
@@ -33,6 +34,7 @@ class ExpenseService{
             throw err;
         }
     }
+
     async addExpense(payload){
         try{
             const {description,category_id,amount,user_id, date} = payload;
@@ -118,8 +120,8 @@ class ExpenseService{
             if(!month || !year){
                 throw createError.InternalServerError("year/month cannot be empty");
             }
-            const query = `select * from expense where user_id = ${user_id} and SUBSTRING_INDEX(date, '-', 1) = '${month}'
-            AND SUBSTRING_INDEX(date, '-', -1) = '${year}'`;
+            const query = `select * from expense where user_id = 7 and SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 2),'-',-1) = '${month}'
+            AND SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3),'-',-1) = '${year}';`;
             console.log(query);
 
             const data = await DATA.CONNECTION.mysql.query(query,{
@@ -138,10 +140,87 @@ class ExpenseService{
 
     async addBudget(payload){
         try{
+            const {user_id, amount, month, year} = payload;
 
+            const data = await BudgetModel.findOne({
+                where:{
+                    user_id:user_id,
+                    month:month,
+                    year:year
+                }
+            }).catch(err=>{
+                console.log("Error while fetching budget details",err);
+                throw createError.InternalServerError("Error while fetching budget details");
+            })
+
+            console.log(data);
+
+            if(data){
+                throw createError.BadRequest("Budget for this month already exists");
+            }
+
+            const newData = await BudgetModel.create({
+                user_id,
+                month,
+                year,
+                amount
+            }).catch(err=>{
+                console.log("Error while adding budget",err);
+                throw createError.InternalServerError("Error while Budget creation");
+            });
+
+            return newData;
         }
         catch(err){
             throw err;
+        }
+    }
+
+    async getBudgetDetails(payload){
+        try{
+            const {user_id,month,year} = payload;
+            const data = await BudgetModel.findAll({
+                where:{
+                    user_id:user_id,
+                    month:month,
+                    year:year
+                }
+            }).catch(err=>{
+                console.log("Error while fetching budget details",err);
+                throw createError.InternalServerError("Error while fetching budget details");
+            });
+            
+            return data;
+        }   
+        catch(err){
+            throw err;
+        }
+    }
+
+    async editBudget(payload){
+        try{
+            const {id,user_id, month, year, amount} = payload;
+
+            if(!id){
+                throw createError.BadRequest("Id cannot be empty");
+            }
+
+            await BudgetModel.update({
+                amount, year, month
+            },{
+                where:{
+                    id:id,
+                    user_id:user_id
+                }
+            }).catch(err=>{
+                console.log("Error while updating budget details",err);
+                throw err;
+            });
+
+            return "Budget Updated Successfully";
+        }
+        catch(err){
+
         }
     }
 }
