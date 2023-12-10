@@ -254,9 +254,9 @@ class ExpenseService{
             select t.month, t.year, t.total_expenses,  coalesce(b.amount,0) as budget from teby t LEFT JOIN budget b on t.month = b.month and t.year = b.year
             and t.user_id = b.user_id
             UNION 
-            select b.month, b.year, coalesce(sum(e.amount),0) as total_expenses, b.amount as budget from budget b LEFT join expense e ON 
-            b.month = SUBSTRING_INDEX(SUBSTRING_INDEX(e.date, '-', 2), '-', -1)
-            and b.year = SUBSTRING_INDEX(SUBSTRING_INDEX(e.date, '-', 3), '-', -1)
+            select b.month, b.year, coalesce(sum(e.total_expenses),0) as total_expenses, b.amount as budget from budget b LEFT join teby e 
+            ON b.month = e.month
+             and b.year = e.year
             and b.user_id = e.user_id where b.user_id = ${user_id} group by b.month, b.year, b.amount;
             `;
             const data = await DATA.CONNECTION.mysql.query(query,{
