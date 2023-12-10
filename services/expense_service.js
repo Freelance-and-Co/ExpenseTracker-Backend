@@ -225,6 +225,44 @@ class ExpenseService{
 
         }
     }
+
+    async getExpenseByYear(payload){
+        try{
+            const {year,user_id} = payload;
+            if(!year){
+                throw createError.BadRequest("Year cannot be empty");
+            }
+
+            let query = `
+            with teby as (
+                SELECT
+                SUM(amount) AS total_expenses,
+                SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 2), '-', -1) AS month,
+                SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3), '-', -1) AS year,
+                user_id
+            FROM
+                expense
+            WHERE
+                user_id = ${user_id}
+                AND SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3), '-', -1) = '${year}'
+            GROUP BY
+                SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3), '-', -1), 
+                SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 2), '-', -1)
+            ) 
+            SELECT te.*, b.amount as budget from teby te JOIN budget b ON te.year = b.year and te.month = b.month
+            and te.user_id = b.user_id;
+            `;
+            const data = await DATA.CONNECTION.mysql.query(query,{
+                type: Sequelize.QueryTypes.SELECT
+            }).catch(err=>{
+                console.log("Error while fetching data from expenses table",err);
+                throw createError.InternalServerError("Error while fetching expenses data");
+            })
+        }   
+        catch(err){
+            throw err;
+        }
+    }
 }
 
 module.exports = ExpenseService;

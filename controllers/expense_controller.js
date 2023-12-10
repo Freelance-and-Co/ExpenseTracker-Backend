@@ -139,6 +139,25 @@ router.post('/editBudget', new AuthService().verifyAccessToken, async (req,res,n
     }
 });
 
+router.post("/getExpenseByYear", new AuthService().verifyAccessToken, async(req,res,next)=>{
+    try{
+        const expenseServiceObj = new ExpenseService();
+        const data = await expenseServiceObj.getExpenseByYear({
+            ...req.body,
+            "user_id":parseInt(req.payload)
+        });
+
+        res.send({
+            "message":"Data fetched successfully",
+            "status":200,
+            "data":data
+        }) 
+    }
+    catch(err){
+        next(err);
+    }
+});
+
 router.post("/getBudgetDetails", new AuthService().verifyAccessToken, async (req,res,next)=>{
     try{
         const expenseServiceObj = new ExpenseService();
