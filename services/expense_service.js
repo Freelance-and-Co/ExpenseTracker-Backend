@@ -233,6 +233,8 @@ class ExpenseService{
                 throw createError.BadRequest("Year cannot be empty");
             }
 
+            const allMonths = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+
             let query = `
             with teby as (
                 SELECT
@@ -258,7 +260,18 @@ class ExpenseService{
                 console.log("Error while fetching data from expenses table",err);
                 throw createError.InternalServerError("Error while fetching expenses data");
             })
-            return data;
+
+            const result = allMonths.map(month => {
+                const matchingData = data.find(d => d.month === month);
+                return matchingData || {
+                    month: month,
+                    year: year,
+                    user_id: user_id,
+                    total_expenses: 0,
+                    budget: 0
+                };
+            });
+            return result;
         }   
         catch(err){
             throw err;
