@@ -258,6 +258,7 @@ class ExpenseService{
                 console.log("Error while fetching data from expenses table",err);
                 throw createError.InternalServerError("Error while fetching expenses data");
             })
+            return data;
         }   
         catch(err){
             throw err;
