@@ -236,23 +236,28 @@ class ExpenseService{
             const allMonths = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
             let query = `
-            with teby as (
+            WITH teby AS (
                 SELECT
-                SUM(amount) AS total_expenses,
-                SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 2), '-', -1) AS month,
-                SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3), '-', -1) AS year,
-                user_id
-            FROM
-                expense
-            WHERE
-                user_id = ${user_id}
-                AND SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3), '-', -1) = '${year}'
-            GROUP BY
-                SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3), '-', -1), 
-                SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 2), '-', -1)
-            ) 
-            SELECT te.*, b.amount as budget from teby te JOIN budget b ON te.year = b.year and te.month = b.month
-            and te.user_id = b.user_id;
+                    COALESCE(SUM(amount),0) AS total_expenses,
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 2), '-', -1) AS month,
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3), '-', -1) AS year,
+                    user_id
+                FROM
+                    expense
+                WHERE
+                    user_id = ${user_id} AND
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3), '-', -1) = '2023'
+                GROUP BY
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 3), '-', -1),
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(date, '-', 2), '-', -1)
+            )
+            select t.month, t.year, t.total_expenses,  coalesce(b.amount,0) as budget from teby t LEFT JOIN budget b on t.month = b.month and t.year = b.year
+            and t.user_id = b.user_id
+            UNION 
+            select b.month, b.year, coalesce(sum(e.amount),0) as total_expenses, b.amount as budget from budget b LEFT join expense e ON 
+            b.month = SUBSTRING_INDEX(SUBSTRING_INDEX(e.date, '-', 2), '-', -1)
+            and b.year = SUBSTRING_INDEX(SUBSTRING_INDEX(e.date, '-', 3), '-', -1)
+            and b.user_id = e.user_id where b.user_id = ${user_id} group by b.month, b.year, b.amount;
             `;
             const data = await DATA.CONNECTION.mysql.query(query,{
                 type: Sequelize.QueryTypes.SELECT
