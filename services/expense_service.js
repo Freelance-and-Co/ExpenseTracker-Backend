@@ -158,7 +158,10 @@ class ExpenseService{
             console.log(data);
 
             if(data){
-                throw createError.BadRequest("Budget for this month already exists");
+                throw createError.BadRequest({
+                    "error":"Budget Already Exists for given month",
+                    "id":data.id
+                });
             }
 
             const newData = await BudgetModel.create({
