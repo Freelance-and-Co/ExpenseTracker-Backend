@@ -202,6 +202,26 @@ class ExpenseService{
         }
     }
 
+    async getBudgetDetailsByYear(payload){
+        try{
+            const {user_id,year} = payload;
+            const data = await BudgetModel.findAll({
+                where:{
+                    user_id:user_id,
+                    year:year
+                }
+            }).catch(err=>{
+                console.log("Error while fetching budget details",err);
+                throw createError.InternalServerError("Error while fetching budget details");
+            });
+            
+            return data;
+        }   
+        catch(err){
+            throw err;
+        }
+    }
+
     async editBudget(payload){
         try{
             const {id,user_id, month, year, amount} = payload;

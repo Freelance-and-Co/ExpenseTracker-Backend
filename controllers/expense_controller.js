@@ -178,4 +178,24 @@ router.post("/getBudgetDetails", new AuthService().verifyAccessToken, async (req
     }
 })
 
+router.post("/getBudgetDetailsByYear", new AuthService().verifyAccessToken, async (req,res,next)=>{
+    try{
+        const expenseServiceObj = new ExpenseService();
+
+        const data = await expenseServiceObj.getBudgetDetailsByYear({
+            ...req.body,
+            "user_id":parseInt(req.payload)
+        })
+
+        res.send({
+            "message":"Data fetched successfully",
+            "status":200,
+            "data":data
+        })
+    }
+    catch(err){
+        next(err);
+    }
+})
+
 module.exports = router;
